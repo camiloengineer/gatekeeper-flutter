@@ -1,0 +1,36 @@
+{
+  "filename_criminals": [
+    "old",
+    "new",
+    "v2",
+    "bak",
+    "temp",
+    "backup",
+    "legacy",
+    "deprecated",
+    "retrocompatibility",
+    "dmz",
+    "whitelist",
+    "bypass",
+    "ignore",
+    "allow",
+    "master"
+  ],
+  "code_criminals": [
+    "legacy",
+    "deprecated",
+    "retrocompatibility",
+    "bak",
+    "backup",
+    "old_",
+    "TODO",
+    "FIXME",
+    "fix later",
+    "provisional",
+    "temporary",
+    "master"
+  ],
+  "patterns": [
+    "v[0-9]+"
+  ]
+}

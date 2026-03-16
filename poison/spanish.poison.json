@@ -1,0 +1,37 @@
+{
+  "forbidden_chars": "áéíóúÁÉÍÓÚñÑüÜ¿¡",
+  "suffixes": [
+    { "suffix": "cion", "min": 4, "msg": "suffix -cion" },
+    { "suffix": "idad", "min": 4, "msg": "suffix -idad" },
+    { "suffix": "miento", "min": 5, "msg": "suffix -miento" },
+    { "suffix": "mente", "min": 5, "msg": "suffix -mente" },
+    { "suffix": "apa", "min": 4, "msg": "suffix -apa" },
+    { "suffix": "ega", "min": 4, "msg": "suffix -ega" },
+    { "suffix": "aje", "min": 4, "msg": "suffix -aje" }
+  ],
+  "ignored_words": [
+    "mega",
+    "omega",
+    "giga",
+    "strategy",
+    "ideal",
+    "message",
+    "package",
+    "storage",
+    "voltage",
+    "manage",
+    "image",
+    "passage",
+    "stage",
+    "page",
+    "usage",
+    "garage",
+    "badge",
+    "vintage",
+    "footage",
+    "coverage",
+    "leverage",
+    "bandage",
+    "average"
+  ]
+}
