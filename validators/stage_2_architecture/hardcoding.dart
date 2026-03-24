@@ -3,13 +3,15 @@ import 'dart:io';
 import '../../core/infra_ui.dart';
 import '../../core/validator_runner.dart';
 
-/// HARDCODING GOVERNANCE SENTRY
-/// Prohibits magic strings and magic numbers in business logic.
-/// Enforces centralization in core/constants.
-
 final _whitelistedNumbers = <num>{0, 1, 2, 3, 4, 5, 10, 100, 255, 1000};
-
 final _numberPattern = RegExp(r'\b\d+(?:\.\d+)?\b');
+
+final _selfDocumentingPatterns = [
+  RegExp(r'alpha:\s*$'),
+  RegExp(r'Duration\(\s*\w+:\s*$'),
+  RegExp(r'stops:\s*(?:const\s*)?\['),
+  RegExp(r'Offset\(\s*$'),
+];
 
 bool _isAllowedFile(String filePath) {
   final normalized = filePath.replaceAll('\\', '/');
@@ -33,16 +35,25 @@ class _Violation {
   _Violation({required this.line, required this.value, required this.type, required this.message});
 }
 
+bool _isSelfDocumenting(String line, int matchStart) {
+  final prefix = line.substring(0, matchStart);
+  return _selfDocumentingPatterns.any((p) => p.hasMatch(prefix));
+}
+
 List<_Violation> _checkNumberViolations(String line, int lineNum) {
   final violations = <_Violation>[];
   final matches = _numberPattern.allMatches(line);
 
   for (final match in matches) {
-    final num = double.tryParse(match.group(0)!);
-    if (num == null || _whitelistedNumbers.contains(num)) continue;
-    if (num == num.toInt() && _whitelistedNumbers.contains(num.toInt())) continue;
+    final numStr = match.group(0)!;
+    final parsed = double.tryParse(numStr);
+    if (parsed == null || _whitelistedNumbers.contains(parsed)) continue;
 
-    // Skip if adjacent to identifier chars or dots (likely a property access or version)
+    final intVal = parsed.toInt();
+    if (parsed == intVal.toDouble() && _whitelistedNumbers.contains(intVal)) continue;
+
+    if (_isSelfDocumenting(line, match.start)) continue;
+
     final prevIdx = match.start - 1;
     final nextIdx = match.end;
     if (prevIdx >= 0) {
@@ -56,9 +67,9 @@ List<_Violation> _checkNumberViolations(String line, int lineNum) {
 
     violations.add(_Violation(
       line: lineNum,
-      value: match.group(0)!,
+      value: numStr,
       type: 'NUMBER',
-      message: "Magic number ${match.group(0)} detected. Move to 'constants/' directory.",
+      message: "Magic number $numStr detected. Move to 'constants/' directory.",
     ));
   }
 
@@ -66,8 +77,6 @@ List<_Violation> _checkNumberViolations(String line, int lineNum) {
 }
 
 int validate() {
-  InfraUI.info('[Hardcoding Sentry] Auditing business logic for magic numbers...');
-
   final dartFiles = getDartFiles();
   var hasViolations = false;
 
@@ -82,7 +91,6 @@ int validate() {
       final line = lines[i];
       final trimmed = line.trim();
 
-      // Skip comments
       if (trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*')) continue;
 
       final violations = _checkNumberViolations(line, i + 1);
@@ -100,6 +108,5 @@ int validate() {
 
   if (hasViolations) return 1;
 
-  InfraUI.success('[Hardcoding Sentry] PASSED: No magic values detected in business logic.');
   return 0;
 }

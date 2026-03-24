@@ -1,18 +1,13 @@
 import 'dart:io';
 import 'dart:convert';
 
-/// Resolves the gatekeeper root directory from the script location.
-/// When running via `dart run .gatekeeper/bin/sentinel.dart`, Platform.script
-/// points to `.gatekeeper/bin/sentinel.dart`, so root is `.gatekeeper/`.
 String get _gatekeeperRoot {
   final scriptPath = Platform.script.toFilePath();
   final normalized = scriptPath.replaceAll('\\', '/');
-  // sentinel.dart is at <root>/bin/sentinel.dart
   final binIndex = normalized.lastIndexOf('/bin/');
   if (binIndex != -1) {
     return normalized.substring(0, binIndex);
   }
-  // Fallback: look for .gatekeeper/ in CWD
   if (Directory('.gatekeeper').existsSync()) return '.gatekeeper';
   return 'gatekeeper';
 }
@@ -27,22 +22,33 @@ String _basename(String path) {
   return lastSlash == -1 ? normalized : normalized.substring(lastSlash + 1);
 }
 
-/// Get all Dart files in lib/, excluding generated files.
 List<String> getDartFiles({String root = 'lib'}) {
-  final dir = Directory(root);
-  if (!dir.existsSync()) return [];
+  final roots = [
+    root,
+    'bin',
+    'core',
+    'validators',
+  ];
 
-  return dir
-      .listSync(recursive: true)
-      .whereType<File>()
-      .where((f) => f.path.endsWith('.dart'))
-      .where((f) => !f.path.endsWith('.g.dart'))
-      .where((f) => !f.path.endsWith('.freezed.dart'))
-      .map((f) => _normalizePath(f.path))
-      .toList();
+  final allFiles = <String>[];
+
+  for (final r in roots) {
+    final dir = Directory(r);
+    if (!dir.existsSync()) continue;
+
+    final files = dir
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart'))
+        .where((f) => !f.path.endsWith('.g.dart'))
+        .where((f) => !f.path.endsWith('.freezed.dart'))
+        .map((f) => _normalizePath(f.path));
+    allFiles.addAll(files);
+  }
+
+  return allFiles.toSet().toList();
 }
 
-/// Get all files in the project, excluding common ignore patterns.
 List<String> getAllFiles() {
   final ignorePatterns = [
     '.git',
@@ -77,10 +83,8 @@ List<String> getAllFiles() {
       .toList();
 }
 
-/// Get the basename of a file path.
 String basename(String path) => _basename(path);
 
-/// Load a poison registry JSON file.
 Map<String, dynamic> loadRegistry(String registryName) {
   final registryPath = '$_gatekeeperRoot/poison/$registryName.json';
   final file = File(registryPath);
@@ -92,13 +96,11 @@ Map<String, dynamic> loadRegistry(String registryName) {
   return jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
 }
 
-/// Check if file is in the poison zone (should be excluded from validation).
 bool isPoisonZone(String filePath) {
   final normalized = _normalizePath(filePath);
   return normalized.contains('/poison/') || normalized.endsWith('.poison.json');
 }
 
-/// Check staged files for infrastructure mutations.
 ({bool hasMutation, List<String> files, bool isAuthorized})
     checkArchitectureMutation() {
   const infrastructurePatterns = [

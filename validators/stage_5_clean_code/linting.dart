@@ -3,9 +3,8 @@ import 'dart:io';
 import '../../core/infra_ui.dart';
 
 int validate() {
-  InfraUI.info('🔍 Running dart analyze (full linting)...');
-
-  final result = Process.runSync('dart', ['analyze', 'lib/']);
+  final targetDir = Directory('lib').existsSync() ? 'lib/' : '.';
+  final result = Process.runSync('dart', ['analyze', targetDir]);
   final output = '${result.stdout}${result.stderr}'.trim();
 
   if (result.exitCode != 0) {
@@ -14,13 +13,10 @@ int validate() {
     return 1;
   }
 
-  // Also check for warnings
   if (output.contains(' warning ') || output.contains(' info ')) {
     InfraUI.warn('\n⚠️  LINTING WARNINGS/INFOS:');
     InfraUI.log(output);
-    // Warnings don't block, only errors do
   }
 
-  InfraUI.success('✅ Linting passed (dart analyze clean).');
   return 0;
 }

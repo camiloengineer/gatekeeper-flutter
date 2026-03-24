@@ -22,8 +22,6 @@ class _Violation {
 }
 
 int validate() {
-  InfraUI.info('Validating English-only policy...');
-
   final config = loadRegistry('spanish.poison');
   if (config.isEmpty) return 0;
 
@@ -38,7 +36,6 @@ int validate() {
   final violations = <_Violation>[];
 
   for (final filePath in dartFiles) {
-    // Exempt test files and gatekeeper internals
     if (filePath.contains('/test/') || filePath.endsWith('_test.dart')) continue;
     if (filePath.contains('/gatekeeper/')) continue;
     if (filePath.endsWith('.md')) continue;
@@ -52,7 +49,6 @@ int validate() {
       final line = lines[i];
       final lineNum = i + 1;
 
-      // Check forbidden characters
       final chars = charRegex.allMatches(line).map((m) => m.group(0)!).toSet();
       if (chars.isNotEmpty) {
         violations.add(_Violation(
@@ -64,7 +60,6 @@ int validate() {
         ));
       }
 
-      // Morphological check — split camelCase and separators
       final tokens = line
           .replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m[1]} ${m[2]}')
           .split(RegExp(r'[^A-Za-z0-9]'))
@@ -97,7 +92,6 @@ int validate() {
   }
 
   if (violations.isEmpty) {
-    InfraUI.success('PASSED: English-only validated');
     return 0;
   }
 

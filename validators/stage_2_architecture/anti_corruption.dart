@@ -4,8 +4,6 @@ import '../../core/infra_ui.dart';
 import '../../core/validator_runner.dart';
 
 int validate() {
-  InfraUI.info('Validating anti-corruption layer...');
-
   final dictionary = loadRegistry('corruption.poison');
   if (dictionary.isEmpty) return 0;
 
@@ -13,7 +11,6 @@ int validate() {
   final codeCriminals = (dictionary['code_criminals'] as List<dynamic>?)?.cast<String>() ?? [];
   final patterns = (dictionary['patterns'] as List<dynamic>?)?.cast<String>() ?? [];
 
-  // Build filename patterns
   final filenamePatterns = <(RegExp, String)>[];
   for (final kw in filenameCriminals) {
     filenamePatterns.add((
@@ -27,7 +24,6 @@ int validate() {
     ));
   }
 
-  // Build code patterns
   final codePatterns = <(RegExp, String)>[];
   for (final td in codeCriminals) {
     codePatterns.add((
@@ -48,7 +44,6 @@ int validate() {
   for (final filePath in allFiles) {
     if (isPoisonZone(filePath)) continue;
 
-    // Filename check
     final filename = basename(filePath);
     for (final (regex, msg) in filenamePatterns) {
       if (regex.hasMatch(filename)) {
@@ -59,7 +54,6 @@ int validate() {
       }
     }
 
-    // Content check — only Dart files in lib/
     if (!filePath.endsWith('.dart')) continue;
     if (filePath.contains('/test/') || filePath.endsWith('_test.dart')) continue;
     if (filePath.contains('/gatekeeper/')) continue;
@@ -100,6 +94,5 @@ int validate() {
     return 1;
   }
 
-  InfraUI.success('PASSED: Anti-Corruption audit completed. No criminal signatures detected.');
   return 0;
 }

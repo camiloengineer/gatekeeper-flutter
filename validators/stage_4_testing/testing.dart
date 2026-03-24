@@ -3,13 +3,8 @@ import 'dart:io';
 import '../../core/infra_ui.dart';
 
 int validate() {
-  InfraUI.info('🧪 Running Flutter tests...');
-
   final testDir = Directory('test');
-  if (!testDir.existsSync()) {
-    InfraUI.warn('⚠️  No test/ directory found. Testing skipped.');
-    return 2; // omit
-  }
+  if (!testDir.existsSync()) return 2;
 
   final testFiles = testDir
       .listSync(recursive: true)
@@ -17,20 +12,16 @@ int validate() {
       .where((f) => f.path.endsWith('_test.dart'))
       .toList();
 
-  if (testFiles.isEmpty) {
-    InfraUI.warn('⚠️  No test files found. Testing skipped.');
-    return 2; // omit
-  }
+  if (testFiles.isEmpty) return 2;
 
-  final result = Process.runSync('flutter', ['test', '--no-pub']);
+  final result = Process.runSync('flutter', ['test', '--no-pub', '--reporter', 'expanded']);
   final output = '${result.stdout}${result.stderr}'.trim();
 
   if (result.exitCode != 0) {
-    InfraUI.error('\n❌ TESTS FAILED:');
+    InfraUI.error('\n❌ TESTING FAILED: flutter test returned errors.');
     if (output.isNotEmpty) InfraUI.log(output);
     return 1;
   }
 
-  InfraUI.success('✅ All tests passed.');
   return 0;
 }

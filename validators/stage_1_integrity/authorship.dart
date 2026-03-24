@@ -3,15 +3,12 @@ import 'dart:io';
 import '../../core/infra_ui.dart';
 
 int validate() {
-  InfraUI.info('Validating commit authorship...');
-
   try {
     final gitDirResult = Process.runSync('git', ['rev-parse', '--git-dir']);
     final gitDir = (gitDirResult.stdout as String).trim();
     final msgFile = File('$gitDir/COMMIT_EDITMSG');
 
     if (!msgFile.existsSync()) {
-      InfraUI.success('PASSED: No commit message found (non-commit context).');
       return 0;
     }
 
@@ -34,7 +31,6 @@ int validate() {
       return 1;
     }
 
-    InfraUI.success('PASSED: No co-authorship detected.');
     return 0;
   } catch (e) {
     InfraUI.warn('⚠️  [Authorship] Could not resolve Git commit message. Validation skipped.');

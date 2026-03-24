@@ -34,7 +34,7 @@ int validate() {
       InfraUI.error('      - $v');
     }
     InfraUI.log('\n   Reason: AI instruction files and local-only manifests are strictly FORBIDDEN.');
-    InfraUI.success('   Action: Use "git rm <file>" to remove them from the repository history.\n');
+    InfraUI.warn('   Action: Use "git rm <file>" to remove them from the repository history.\n');
     return 1;
   }
 

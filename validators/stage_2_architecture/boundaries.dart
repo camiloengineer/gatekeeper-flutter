@@ -3,13 +3,6 @@ import 'dart:io';
 import '../../core/infra_ui.dart';
 import '../../core/validator_runner.dart';
 
-/// ARCHITECTURE BOUNDARIES VALIDATOR
-/// ----------------------------------
-/// Enforces import rules between layers:
-/// 1. features/ cannot import from another feature/
-/// 2. shared/ cannot import from features/
-/// 3. core/ cannot import from features/
-/// 4. models/ cannot import from services/
 final _rules = <String, bool Function(String import, String file)>{
   'Features cannot import other Features': (imp, file) {
     if (!file.contains('/features/')) return false;
@@ -35,10 +28,8 @@ String? _extractFeatureName(String path) {
 }
 
 int validate() {
-  InfraUI.info('🔍 Architecture Integrity Check (Boundaries Validation)');
-
   final libDir = Directory('lib');
-  if (!libDir.existsSync()) return 2; // omit
+  if (!libDir.existsSync()) return 2;
 
   final dartFiles = getDartFiles();
   final violations = <String>[];
@@ -52,12 +43,10 @@ int validate() {
       final line = lines[i].trim();
       if (!line.startsWith('import ')) continue;
 
-      // Extract import path
       final match = RegExp("import\\s+['\"]([^'\"]+)['\"]").firstMatch(line);
       if (match == null) continue;
       final importPath = match.group(1)!;
 
-      // Only check relative and package imports that reference internal code
       if (importPath.startsWith('dart:')) continue;
       if (!importPath.contains('/features/') &&
           !importPath.contains('/shared/') &&
@@ -88,6 +77,5 @@ int validate() {
     return 1;
   }
 
-  InfraUI.success('PASSED: Architecture boundaries validated.');
   return 0;
 }

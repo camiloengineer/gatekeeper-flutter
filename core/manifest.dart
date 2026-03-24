@@ -1,6 +1,3 @@
-/// ARCHITECTURAL INTEGRITY MANIFEST
-/// This is the static contract of all mandatory validators.
-/// Any mismatch between this list and the physical files results in an INTEGRITY_BREACH.
 const List<String> mandatoryValidators = [
   'anti_corruption',
   'authorship',
@@ -11,6 +8,7 @@ const List<String> mandatoryValidators = [
   'forbidden_files',
   'ghost',
   'hardcoding',
+  'inline_comments',
   'linting',
   'mutation',
   'no_spanish',

@@ -3,14 +3,6 @@ import 'dart:io';
 import '../../core/infra_ui.dart';
 import '../../core/validator_runner.dart' as vr;
 
-/// FEATURES ARCHITECTURE VALIDATOR
-/// --------------------------------
-/// Validates the structure of feature directories:
-/// - Each feature must have: *_page.dart, +state/ directory
-/// - Allowed subdirectories: components, models, +state
-/// - No forbidden directories (services, utils, helpers, etc.)
-/// - No empty directories
-
 const _forbiddenDirs = [
   'services',
   'utils',
@@ -118,7 +110,6 @@ void _validateFeatureStructure(Directory featureDir, List<_Violation> violations
         ));
       }
     } else if (entry is File) {
-      // Root files in a feature should be *_page.dart or barrel
       if (name != 'index.dart' &&
           !name.endsWith('_page.dart') &&
           !name.endsWith('.dart')) {
@@ -134,17 +125,13 @@ void _validateFeatureStructure(Directory featureDir, List<_Violation> violations
 }
 
 int validate() {
-  InfraUI.info('Validating features/ architecture...');
-
   final violations = <_Violation>[];
 
-  // Check empty directories in lib/
   final libDir = Directory('lib');
   if (libDir.existsSync()) {
     _checkEmptyDirs(libDir, violations);
   }
 
-  // Check feature structure
   final featuresDir = Directory('lib/features');
   if (featuresDir.existsSync()) {
     for (final entry in featuresDir.listSync()) {
@@ -155,7 +142,6 @@ int validate() {
   }
 
   if (violations.isEmpty) {
-    InfraUI.success('PASSED: Structure & Features architecture validated');
     return 0;
   }
 
@@ -170,6 +156,5 @@ int validate() {
     InfraUI.gray('      Severity: ${v.severity}\n');
   }
 
-  InfraUI.error('FAILED: Commit blocked. Fix architecture violations.\n');
   return 1;
 }

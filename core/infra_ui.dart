@@ -1,4 +1,5 @@
-// ignore_for_file: avoid_print
+import 'constants/ui.constants.dart';
+
 const String _red = '\x1b[31m';
 const String _green = '\x1b[32m';
 const String _yellow = '\x1b[33m';
@@ -15,6 +16,6 @@ class InfraUI {
   static void info(String message) => print('$_cyan$message$_reset');
   static void header(String title) =>
       print('$_bold${_cyan}=== ${title.toUpperCase()} ===$_reset');
-  static void divider() => print('$_gray${'─' * 60}$_reset');
+  static void divider() => print('$_gray${'─' * reportWidth}$_reset');
   static void gray(String message) => print('$_gray$message$_reset');
 }

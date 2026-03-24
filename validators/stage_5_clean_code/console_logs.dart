@@ -3,15 +3,13 @@ import 'dart:io';
 import '../../core/infra_ui.dart';
 import '../../core/validator_runner.dart';
 
-/// CONSOLE LOGS VALIDATOR
-/// ----------------------
-/// Detects print() and debugPrint() statements in production code.
-/// Exempts test files and the gatekeeper itself.
-
 final _printPattern = RegExp(r'\b(print|debugPrint|log)\s*\(');
 
 const _sanctionedPaths = [
   'gatekeeper/',
+  'validators/',
+  'core/infra_ui.dart',
+  'bin/sentinel.dart',
 ];
 
 bool _isSanctioned(String filePath) {
@@ -22,8 +20,6 @@ bool _isSanctioned(String filePath) {
 }
 
 int validate() {
-  InfraUI.info('🧹 Clean Console Logs Validator...');
-
   final dartFiles = getDartFiles();
   final violations = <(String file, int line, String method)>[];
 
@@ -37,7 +33,6 @@ int validate() {
     for (var i = 0; i < lines.length; i++) {
       final line = lines[i].trim();
 
-      // Skip comments
       if (line.startsWith('//') || line.startsWith('/*') || line.startsWith('*')) continue;
 
       final match = _printPattern.firstMatch(line);
@@ -56,6 +51,5 @@ int validate() {
     return 1;
   }
 
-  InfraUI.success('✅ Console Logs Guard: Passed.');
   return 0;
 }
