@@ -2,3 +2,6 @@
 .idea/
 *.iml
 .DS_Store
+ARCHITECTURE.md
+AGENTS.md
+CLAUDE.md
